@@ -70,23 +70,21 @@ export class JWT {
         if (!this.options.timeOffset) {
             this.options.timeOffset = 0;
         }
-
-
     }
 
     public sign(data: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
 
-        let signature: string;
+        let signature: Buffer;
 
         if (algorithm === 'RS256') {
             signature = crypto.createSign('RSA-SHA' + algorithm.substr(1))
                 .update(data)
-                .sign(key, 'hex');
+                .sign(key);
 
         } else if (algorithm === ('HS256' || 'HS384' || 'HS512')) {
             signature = crypto.createHmac('sha' + algorithm.substr(1), key)
                 .update(data)
-                .digest('hex');
+                .digest();
         } else {
             throw new Error('Unknown or unsupported algorithm: ' + algorithm);
         }
@@ -110,13 +108,13 @@ export class JWT {
 
 
         if (this.options.validate) {
-            return this.validate(token);
+            return this.validate(token, algorithm, key);
         } else {
             return token;
         }
     }
 
-    public encode(payload: Payload, algorithm: Algorithm = this.options.algorithm): string {
+    public encode(payload: Payload, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
 
         const header: Header = {
             typ: 'JWT',
@@ -131,7 +129,7 @@ export class JWT {
 
         encoded.push(base64.encodeSafe(JSON.stringify(header)));
         encoded.push(base64.encodeSafe(JSON.stringify(payload)));
-        encoded.push(this.sign(encoded.join('.'), algorithm));
+        encoded.push(this.sign(encoded.join('.'), algorithm, key));
 
         return encoded.join('.');
     }
@@ -166,7 +164,7 @@ export class JWT {
 export default new JWT({
     algorithm: 'HS256',
     expiresIn: 60 * 60,
-    key: crypto.randomBytes(32).toString('hex'),
+    key: crypto.randomBytes(32).toString('utf8'),
     timeOffset: 60,
     validate: true
 });
