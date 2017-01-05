@@ -64,7 +64,7 @@ export interface Claims {
 }
 
 export class JWT {
-    protected options: Options;
+    public options: Options;
 
     constructor (options: Options) {
         this.options = options;
@@ -79,14 +79,13 @@ export class JWT {
         let signature: Buffer;
 
         if (algorithm === 'RS256') {
-            signature = crypto.createSign('RSA-SHA' + algorithm.substr(1))
+            signature = crypto.createSign('RSA-SHA' + algorithm.substr(2))
                 .update(data)
                 .sign(key);
 
         } else if (algorithm === ('HS256' || 'HS384' || 'HS512')) {
-            signature = crypto.createHmac('sha' + algorithm.substr(1), key)
-                .update(data)
-                .digest();
+            signature = crypto.createHmac('sha' + algorithm.substr(2), key)
+                .update(data).digest();
         } else {
             throw new Error('Unknown or unsupported algorithm: ' + algorithm);
         }
@@ -139,8 +138,18 @@ export class JWT {
 
         const token: Token = (data instanceof String) ? this.decode(data) : data;
 
-        if (token.signature !== this.sign([token.header, token.payload].join('.'), algorithm, key)) {
+        if (algorithm.startsWith('HS') && token.signature !== this.sign([token.header, token.payload].join('.'), algorithm, key)) {
+            console.log('declared signature: ' + token.signature);
+            console.log('real signature: ' + this.sign([token.header, token.payload].join('.'), algorithm, key));
             throw new TokenSignatureValidationError();
+        } else if (algorithm.startsWith('RS')) {
+            const isValid = crypto.createVerify('RSA-SHA' + algorithm.substr(2))
+                .update([token.header, token.payload].join('.'))
+                .verify(key, new Buffer(token.signature, 'utf8'));
+
+            if (!isValid) {
+                throw new TokenSignatureValidationError();
+            }
         }
 
         // `options.timeOffset`, `token.payload['nbf']` (not before) and `token.payload['exp']` (expires) are in seconds
@@ -156,10 +165,12 @@ export class JWT {
     }
 }
 
-export default new JWT({
+export const global = new JWT({
     algorithm: 'HS256',
     expiresIn: 60 * 60,
     key: crypto.randomBytes(32).toString('utf8'),
     timeOffset: 60,
     validate: true
 });
+
+export default global;
