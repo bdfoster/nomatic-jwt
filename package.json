@@ -19,5 +19,8 @@
     "encode"
   ],
   "author": "Brian D. Foster <bdfoster89@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^6.0.57"
+  }
 }
