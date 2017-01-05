@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as base64 from './base64';
+import {TokenExpiredError, TokenSignatureValidationError} from './errors';
 
 export type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256';
 export type Payload = Claims | string;
@@ -146,7 +147,7 @@ export class JWT {
         }
 
         if (token.signature !== this.sign([token.header, token.payload].join('.'), algorithm, key)) {
-            throw new Error('Signature validation failed');
+            throw new TokenSignatureValidationError();
         }
 
         // `options.timeOffset`, `token.payload['nbf']` (not before) and `token.payload['exp']` (expires) are in seconds
@@ -155,7 +156,7 @@ export class JWT {
         }
 
         if (token.payload['exp'] && (Date.now() / 1000) + this.options.timeOffset > token.payload['exp']) {
-            throw new Error('Token has expired');
+            throw new TokenExpiredError(token.payload['exp']);
         }
 
         return token;
