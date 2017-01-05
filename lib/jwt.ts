@@ -10,7 +10,7 @@ export interface Header {
     alg: string;
 }
 
-export interface DefaultOptions {
+export interface Options {
     algorithm: Algorithm;
     expiresIn?: number; // In seconds
     timeOffset?: number; // In seconds
@@ -59,12 +59,14 @@ export interface Claims {
      * JWT ID (registered): RFC-7519 (https://tools.ietf.org/html/rfc7519#section-4.1.7)
      */
     jid?: any;
+
+    [key: string]: string | number | boolean | Object | Array<any>;
 }
 
 export class JWT {
-    protected options: DefaultOptions;
+    protected options: Options;
 
-    constructor (options: DefaultOptions) {
+    constructor (options: Options) {
         this.options = options;
 
         if (!this.options.timeOffset) {
@@ -105,8 +107,6 @@ export class JWT {
             signature: encodedParts[2]
         };
 
-
-
         if (this.options.validate) {
             return this.validate(token, algorithm, key);
         } else {
@@ -121,8 +121,9 @@ export class JWT {
             alg: algorithm
         };
 
-        if (payload instanceof Object && this.options.expiresIn) {
-            payload['exp'] = Date.now() / 1000 + this.options.expiresIn;
+        if (!(payload instanceof String) && this.options.expiresIn) {
+            payload.exp = Date.now() / 1000 + this.options.expiresIn;
+            payload.nbf = Date.now() / 1000;
         }
 
         const encoded = [];
@@ -136,13 +137,7 @@ export class JWT {
 
     public validate(data: string | Token, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key) {
 
-        let token: Token;
-
-        if (data instanceof String) {
-            token = this.decode(data);
-        } else {
-            token = data;
-        }
+        const token: Token = (data instanceof String) ? this.decode(data) : data;
 
         if (token.signature !== this.sign([token.header, token.payload].join('.'), algorithm, key)) {
             throw new TokenSignatureValidationError();
