@@ -84,7 +84,7 @@ describe('JWT', () => {
             };
             const token = instance.encode(data);
 
-            const decoded = instance.decode(token);
+            const decoded = instance.validate(token);
 
             expect(decoded.payload).to.equal(JSON.stringify(data));
         });
