@@ -62,25 +62,31 @@ describe('JWT', () => {
 
     describe('#decode()', () => {
         it('should decode a token', () => {
-            const token = instance.encode({
-                data: true
-            });
+            const data = {
+                bool: true,
+                str: 'test123',
+                num: 123
+            };
+            const token = instance.encode(data);
 
             const decoded = instance.decode(token);
 
-            expect(decoded.payload['data']).to.equal(true);
+            expect(decoded.payload).to.equal(JSON.stringify(data));
         });
     });
 
     describe('#validate()', () => {
         it('should validate a token', () => {
-            const token = instance.encode({
-                data: true
-            });
+            const data = {
+                bool: true,
+                str: 'test123',
+                num: 123
+            };
+            const token = instance.encode(data);
 
             const decoded = instance.decode(token);
 
-            expect(decoded.payload['data']).to.equal(true);
+            expect(decoded.payload).to.equal(JSON.stringify(data));
         });
     });
 });
