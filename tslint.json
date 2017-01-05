@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "cyclomatic-complexity": [
+      true,
+      15
+    ],
+    "prefer-const": true,
+    "semicolon": true,
+    "jsdoc-format": true,
+    "class-name": true,
+    "new-parens": true,
+    "ordered-imports": true,
+    "one-variable-per-declaration": true,
+    "quotemark": [
+      true,
+      "single"
+    ],
+    "no-use-before-declare": true,
+    "no-var-keyword": true,
+    "no-reference": true,
+    "align": [
+      true,
+      "parameters",
+      "statements"
+    ],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
+    "indent": [
+      true,
+      "spaces"
+    ]
+  }
+}
