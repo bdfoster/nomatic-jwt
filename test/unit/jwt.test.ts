@@ -36,6 +36,20 @@ describe('JWT', () => {
         });
     });
 
+    describe('#sign()', () => {
+        it('should consistently sign some data via HMAC', () => {
+            const key = '123123123123';
+            const data = JSON.stringify({
+                bool: true,
+                str: 'test123',
+                num: 123
+            });
+            const comparison = instance.sign(data, 'HS256', key);
+
+            expect(comparison).to.equal(instance.sign(data, 'HS256', key));
+        });
+    });
+
     describe('#encode()', () => {
         it('should encode a token', () => {
             const token = instance.encode({
