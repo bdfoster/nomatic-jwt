@@ -4,9 +4,9 @@ import * as jwt from '../../lib/jwt';
 
 
 describe('JWT', () => {
-    let instance: jwt.JWT;
+    let hmac: jwt.JWT;
     before((done) => {
-        instance = new jwt.JWT({
+        hmac = new jwt.JWT({
             algorithm: 'HS256',
             expiresIn: 60 * 60,
             key: 'testkey12341234',
@@ -43,15 +43,15 @@ describe('JWT', () => {
                 str: 'test123',
                 num: 123
             });
-            const comparison = instance.sign(data);
+            const comparison = hmac.sign(data);
 
-            expect(comparison).to.equal(instance.sign(data));
+            expect(comparison).to.equal(hmac.sign(data));
         });
     });
 
     describe('#encode()', () => {
         it('should encode a token', () => {
-            const token = instance.encode({
+            const token = hmac.encode({
                 data: true
             });
 
@@ -66,9 +66,9 @@ describe('JWT', () => {
                 str: 'test123',
                 num: 123
             };
-            const token = instance.encode(data);
+            const token = hmac.encode(data);
 
-            const decoded = instance.decode(token);
+            const decoded = hmac.decode(token);
 
             expect(decoded.payload).to.equal(JSON.stringify(data));
         });
@@ -81,9 +81,9 @@ describe('JWT', () => {
                 str: 'test123',
                 num: 123
             };
-            const token = instance.encode(data);
+            const token = hmac.encode(data);
 
-            const decoded = instance.validate(token);
+            const decoded = hmac.validate(token);
 
             expect(decoded.payload).to.equal(JSON.stringify(data));
         });
