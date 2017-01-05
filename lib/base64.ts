@@ -12,15 +12,11 @@ export function encodeSafe(data: string | Buffer = '') {
     return data.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-export function decode (data: string | Buffer = '') {
-    if (data instanceof Buffer) {
-        return data.toString('utf8');
-    }
-
+export function decode (data: string = '') {
     return new Buffer(data, 'base64').toString('utf8');
 }
 
-export function decodeSafe(data: string | Buffer = '') {
+export function decodeSafe(data: string = '') {
     data = data.replace(/-/g, '+').replace(/_/g, '/');
 
     while (data.length % 4) {
