@@ -43,9 +43,9 @@ describe('JWT', () => {
                 str: 'test123',
                 num: 123
             });
-            const comparison = instance.sign(data, 'HS256');
+            const comparison = instance.sign(data);
 
-            expect(comparison).to.equal(instance.sign(data, 'HS256'));
+            expect(comparison).to.equal(instance.sign(data));
         });
     });
 
