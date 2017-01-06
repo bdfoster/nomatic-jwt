@@ -15,7 +15,7 @@ export class TokenExpiredError extends TokenError {
     }
 }
 
-export class TokenSignatureValidationError extends TokenError {
+export class TokenSignatureError extends TokenError {
     constructor() {
         super('Token signature is not valid');
     }

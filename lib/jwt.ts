@@ -1,9 +1,11 @@
 import * as crypto from 'crypto';
+import * as CryptoJS from 'crypto-js';
 import * as base64 from './base64';
-import {TokenExpiredError, TokenSignatureValidationError} from './errors';
+import {TokenExpiredError, TokenSignatureError} from './errors';
 
 export type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256';
-export type Payload = Claims | string;
+export type Claims = RegisteredClaims & PrivateClaims;
+export type Payload = Claims | String;
 
 export interface Header {
     typ: string;
@@ -11,7 +13,7 @@ export interface Header {
 }
 
 export interface Options {
-    algorithm: Algorithm;
+    algorithm?: Algorithm;
     expiresIn?: number; // In seconds
     timeOffset?: number; // In seconds
     key: string;
@@ -24,7 +26,7 @@ export interface Token {
     signature: string;
 }
 
-export interface Claims {
+export interface RegisteredClaims {
     /**
      * Issuer (registered): RFC-7519 (https://tools.ietf.org/html/rfc7519#section-4.1.1)
      */
@@ -59,7 +61,9 @@ export interface Claims {
      * JWT ID (registered): RFC-7519 (https://tools.ietf.org/html/rfc7519#section-4.1.7)
      */
     jid?: any;
+}
 
+export interface PrivateClaims {
     [key: string]: string | number | boolean | Object | Array<any>;
 }
 
@@ -72,25 +76,52 @@ export class JWT {
         if (!this.options.timeOffset) {
             this.options.timeOffset = 0;
         }
+
+        if (!this.options.algorithm) {
+            this.options.algorithm = 'HS256';
+        }
     }
 
-    public sign(data: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
+    public static parsePayload(payload: string): Payload {
+        try {
+            return JSON.parse(payload);
+        } catch (error) {
+            if (error.name !== 'SyntaxError') {
+                throw error;
+            } else {
+                return payload;
+            }
+        }
+    }
 
-        let signature: Buffer;
+    public signRaw(data: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
 
-        if (algorithm === 'RS256') {
+        let signature: string;
+
+        if (algorithm.startsWith('RS')) {
             signature = crypto.createSign('RSA-SHA' + algorithm.substr(2))
                 .update(data)
-                .sign(key);
+                .sign(key, 'base64');
 
-        } else if (algorithm === ('HS256' || 'HS384' || 'HS512')) {
-            signature = crypto.createHmac('sha' + algorithm.substr(2), key)
-                .update(data).digest();
+        } else if (algorithm.startsWith('HS')) {
+            signature = base64
+                .escape(CryptoJS
+                    .enc
+                    .Base64
+                    .stringify(CryptoJS['HmacSHA' + algorithm.substr(2)](data, key)));
         } else {
             throw new Error('Unknown or unsupported algorithm: ' + algorithm);
         }
 
-        return base64.encodeSafe(signature);
+        return signature;
+    }
+
+    public verifyRaw(data: string, signature: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): boolean {
+        if (algorithm.startsWith('HS')) {
+            return signature === this.signRaw(data, algorithm, key);
+        } else if (algorithm.startsWith('RS')) {
+            return false;
+        }
     }
 
     public decode(encoded: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): Token {
@@ -102,7 +133,7 @@ export class JWT {
 
         const token: Token = {
             header: JSON.parse(base64.decodeSafe(encodedParts[0])),
-            payload: base64.decodeSafe(encodedParts[1]),
+            payload: JWT.parsePayload(base64.decodeSafe(encodedParts[1])),
             signature: encodedParts[2]
         };
 
@@ -120,45 +151,56 @@ export class JWT {
             alg: algorithm
         };
 
-        if (!(payload instanceof String) && this.options.expiresIn) {
-            payload.exp = Date.now() / 1000 + this.options.expiresIn;
-            payload.nbf = Date.now() / 1000;
+        if (this.options.expiresIn && !(payload instanceof String) && !payload.exp) {
+            const current = Math.floor(( new Date().getTime() / 1000));
+            payload.exp = current + this.options.expiresIn;
+
+            if (!payload.nbf) {
+                payload.nbf = current;
+            }
+
+            if (!payload.iat) {
+                payload.iat = current;
+            }
         }
 
         const encoded = [];
 
         encoded.push(base64.encodeSafe(JSON.stringify(header)));
         encoded.push(base64.encodeSafe(JSON.stringify(payload)));
-        encoded.push(this.sign(encoded.join('.'), algorithm, key));
+        encoded.push(this.signRaw(encoded.join('.'), algorithm, key));
 
         return encoded.join('.');
     }
 
-    public validate(data: string | Token, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key) {
+    public validate(token: Token, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): Token {
+        const encoded = [];
 
-        const token: Token = (data instanceof String) ? this.decode(data) : data;
+        encoded.push(base64.encodeSafe(JSON.stringify(token.header)));
+        encoded.push(base64.encodeSafe(JSON.stringify(token.payload)));
 
-        if (algorithm.startsWith('HS') && token.signature !== this.sign([token.header, token.payload].join('.'), algorithm, key)) {
-            console.log('declared signature: ' + token.signature);
-            console.log('real signature: ' + this.sign([token.header, token.payload].join('.'), algorithm, key));
-            throw new TokenSignatureValidationError();
-        } else if (algorithm.startsWith('RS')) {
-            const isValid = crypto.createVerify('RSA-SHA' + algorithm.substr(2))
-                .update([token.header, token.payload].join('.'))
-                .verify(key, new Buffer(token.signature, 'utf8'));
+        const data = encoded.join('.');
 
-            if (!isValid) {
-                throw new TokenSignatureValidationError();
+        if (!(this.verifyRaw(data, token.signature, algorithm, key))) {
+            throw new TokenSignatureError();
+        }
+
+        if (!(token.payload instanceof String)) {
+            // `options.timeOffset`, `token.payload['nbf']` (not before) and `token.payload['exp']` (expires) are in seconds
+            if (token.payload['nbf']) {
+                const current = Math.floor((Date.now() / 1000));
+                if (current > (token.payload['nbf'] + this.options.timeOffset)) {
+                    throw new Error('Token is not active yet');
+                }
             }
-        }
 
-        // `options.timeOffset`, `token.payload['nbf']` (not before) and `token.payload['exp']` (expires) are in seconds
-        if (token.payload['nbf'] && (Date.now() / 1000) - this.options.timeOffset < token.payload['nbf']) {
-            throw new Error('Token is not active yet');
-        }
+            if (token.payload['exp']) {
+                const current = Math.floor((Date.now() / 1000));
 
-        if (token.payload['exp'] && (Date.now() / 1000) + this.options.timeOffset > token.payload['exp']) {
-            throw new TokenExpiredError(token.payload['exp']);
+                if (current + this.options.timeOffset > token.payload['exp']) {
+                    throw new TokenExpiredError(token.payload['exp']);
+                }
+            }
         }
 
         return token;
@@ -166,9 +208,8 @@ export class JWT {
 }
 
 export const global = new JWT({
-    algorithm: 'HS256',
     expiresIn: 60 * 60,
-    key: crypto.randomBytes(32).toString('utf8'),
+    key: crypto.randomBytes(128).toString('hex'),
     timeOffset: 60,
     validate: true
 });

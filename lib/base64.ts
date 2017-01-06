@@ -1,27 +1,29 @@
+import * as Crypto from 'crypto-js';
+
 export function encode(data: string | Buffer = ''): string {
     if (data instanceof Buffer) {
-        return data.toString('base64');
+        data = data.toString();
     }
 
-    return new Buffer(data).toString('base64');
-
+    return Crypto.enc.Base64.stringify(Crypto.enc.Utf8.parse(data));
 }
 
-export function encodeSafe(data: string | Buffer = '') {
-    data = encode(data);
-    return data.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export function escape(data: string) {
+    return data.replace(/=+$/, '').replace(/\//g, '_').replace(/\+/g, '-');
 }
 
-export function decode (data: string = '') {
-    return new Buffer(data, 'base64').toString('utf8');
+export function unescape(data: string) {
+    return data.replace(/_/g, '/').replace(/-/g, '+');
 }
 
-export function decodeSafe(data: string = '') {
-    data = data.replace(/-/g, '+').replace(/_/g, '/');
+export function encodeSafe(data: string | Buffer = ''): string {
+   return escape(encode(data));
+}
 
-    while (data.length % 4) {
-        data += '=';
-    }
+export function decode (data: string = ''): string {
+    return Crypto.enc.Base64.parse(data).toString(Crypto.enc.Utf8);
+}
 
-    return decode(data);
+export function decodeSafe(data: string = ''): string {
+    return unescape(decode(data));
 }
