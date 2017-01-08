@@ -46,15 +46,15 @@
     "instrument": true
   },
   "dependencies": {
+    "@types/chai": "^3.4.34",
     "@types/crypto-js": "^3.1.32",
+    "@types/mocha": "^2.2.36",
     "@types/node": "^6.0.57",
     "@types/source-map-support": "^0.2.28",
     "crypto-js": "^3.1.9-1",
     "source-map-support": "^0.4.8"
   },
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.35",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "nyc": "^10.0.0",
