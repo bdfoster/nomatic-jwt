@@ -3,7 +3,7 @@ import * as CryptoJS from 'crypto-js';
 import * as base64 from './base64';
 import {TokenExpiredError, TokenSignatureError} from './errors';
 
-export type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256';
+export type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
 export type Claims = RegisteredClaims & PrivateClaims;
 export type Payload = Claims | String;
 
@@ -16,7 +16,9 @@ export interface Options {
     algorithm?: Algorithm;
     expiresIn?: number; // In seconds
     timeOffset?: number; // In seconds
-    key: string;
+    key?: string;
+    privateKey?: string;
+    publicKey?: string;
     validate?: boolean;
 }
 
@@ -80,6 +82,14 @@ export class JWT {
         if (!this.options.algorithm) {
             this.options.algorithm = 'HS256';
         }
+
+        if (this.options.algorithm.startsWith('HS') && !(this.options.key)) {
+            throw new Error('Must specify `key` param with algorithm: ' +  this.options.algorithm);
+        }
+
+        if (this.options.algorithm.startsWith('RS') && (!(this.options.privateKey || this.options.publicKey))) {
+            throw new Error('Must specify `privateKey` and `publicKey` with algorithm: ' + this.options.algorithm);
+        }
     }
 
     public static parsePayload(payload: string): Payload {
@@ -94,7 +104,14 @@ export class JWT {
         }
     }
 
-    public signRaw(data: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
+    public signRaw(data: string, key: string = null, algorithm: Algorithm = this.options.algorithm): string {
+        if (!key) {
+            if (algorithm.startsWith('RS')) {
+                key = this.options.privateKey;
+            } else if (algorithm.startsWith('HS')) {
+                key = this.options.key;
+            }
+        }
 
         let signature: string;
 
@@ -104,27 +121,46 @@ export class JWT {
                 .sign(key, 'base64');
 
         } else if (algorithm.startsWith('HS')) {
-            signature = base64
-                .escape(CryptoJS
+            signature = CryptoJS
                     .enc
                     .Base64
-                    .stringify(CryptoJS['HmacSHA' + algorithm.substr(2)](data, key)));
+                    .stringify(CryptoJS['HmacSHA' + algorithm.substr(2)](data, key));
         } else {
             throw new Error('Unknown or unsupported algorithm: ' + algorithm);
         }
 
-        return signature;
+        return base64.escape(signature);
     }
 
-    public verifyRaw(data: string, signature: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): boolean {
+    public verifyRaw(data: string, signature: string, key: string = null, algorithm: Algorithm = this.options.algorithm): boolean {
         if (algorithm.startsWith('HS')) {
-            return signature === this.signRaw(data, algorithm, key);
+            if (!key) {
+                key = this.options.key;
+            }
+
+            return signature === this.signRaw(data, key, algorithm);
         } else if (algorithm.startsWith('RS')) {
-            return false;
+            if (!key) {
+                key = this.options.publicKey;
+            }
+
+            return crypto.createVerify('RSA-SHA' + algorithm.substr(2))
+                .update(data)
+                .verify(key, base64.unescape(signature), 'base64');
+        } else {
+            throw new Error('Unknown or unsupported algorithm: ' + algorithm);
         }
     }
 
-    public decode(encoded: string, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): Token {
+    public decode(encoded: string, key: string = null, algorithm: Algorithm = this.options.algorithm): Token {
+        if (!key) {
+            if (algorithm.startsWith('RS')) {
+                key = this.options.publicKey;
+            } else if (algorithm.startsWith('HS')) {
+                key = this.options.key;
+            }
+        }
+
         const encodedParts = encoded.split('.');
 
         if (encodedParts.length !== 3) {
@@ -138,13 +174,20 @@ export class JWT {
         };
 
         if (this.options.validate) {
-            return this.validate(token, algorithm, key);
+            return this.validate(token, key, algorithm);
         } else {
             return token;
         }
     }
 
-    public encode(payload: Payload, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): string {
+    public encode(payload: Payload, key: string = null, algorithm: Algorithm = this.options.algorithm): string {
+        if (!key) {
+            if (algorithm.startsWith('RS')) {
+                key = this.options.privateKey;
+            } else if (algorithm.startsWith('HS')) {
+                key = this.options.key;
+            }
+        }
 
         const header: Header = {
             typ: 'JWT',
@@ -168,12 +211,20 @@ export class JWT {
 
         encoded.push(base64.encodeSafe(JSON.stringify(header)));
         encoded.push(base64.encodeSafe(JSON.stringify(payload)));
-        encoded.push(this.signRaw(encoded.join('.'), algorithm, key));
+        encoded.push(this.signRaw(encoded.join('.'), key, algorithm));
 
         return encoded.join('.');
     }
 
-    public validate(token: Token, algorithm: Algorithm = this.options.algorithm, key: string = this.options.key): Token {
+    public validate(token: Token, key: string = null, algorithm: Algorithm = this.options.algorithm): Token {
+        if (!key) {
+            if (algorithm.startsWith('RS')) {
+                key = this.options.publicKey;
+            } else if (algorithm.startsWith('HS')) {
+                key = this.options.key;
+            }
+        }
+
         const encoded = [];
 
         encoded.push(base64.encodeSafe(JSON.stringify(token.header)));
@@ -181,7 +232,7 @@ export class JWT {
 
         const data = encoded.join('.');
 
-        if (!(this.verifyRaw(data, token.signature, algorithm, key))) {
+        if (!(this.verifyRaw(data, token.signature, key, algorithm))) {
             throw new TokenSignatureError();
         }
 
