@@ -1,0 +1,19 @@
+stages:
+  - test
+Node.js v6.x.x:
+  stage: test
+  cache:
+    paths:
+      - node_modules/
+  image: node:6
+  script:
+    - npm config set spin false
+    - npm install
+    - npm run build
+    - npm test
+    - npm run coverage
+    - npm run docs
+  artifacts:
+    paths:
+      - coverage/
+      - docs/
