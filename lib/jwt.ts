@@ -90,6 +90,10 @@ export class JWT {
         if (this.options.algorithm.startsWith('RS') && (!(this.options.privateKey || this.options.publicKey))) {
             throw new Error('Must specify `privateKey` and `publicKey` with algorithm: ' + this.options.algorithm);
         }
+        
+        if (!this.options.hasOwnProperty('validate')) {
+            this.options.validate = true;
+        }
     }
 
     public static parsePayload(payload: string): Payload {
