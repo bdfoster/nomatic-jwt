@@ -2,9 +2,6 @@ stages:
   - test
 Node.js v8.x.x:
   stage: test
-  cache:
-    paths:
-      - node_modules/
   image: node:8
   script:
     - npm config set spin false
