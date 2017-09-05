@@ -1,11 +1,11 @@
 stages:
   - test
-Node.js v6.x.x:
+Node.js v8.x.x:
   stage: test
   cache:
     paths:
       - node_modules/
-  image: node:6
+  image: node:8
   script:
     - npm config set spin false
     - npm install
