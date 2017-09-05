@@ -1,6 +1,6 @@
 {
   "name": "nomatic-jwt",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "JSON Web Token (JWT) utilities for Node.js",
   "main": "index.js",
   "scripts": {
