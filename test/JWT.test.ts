@@ -17,19 +17,19 @@ describe('JWT', () => {
     before((done) => {
         hs = new JWT({
             algorithm: 'HS256',
+            autoValidate: false,
             expiresIn: 60 * 60,
             key: 'testSecret123',
-            timeOffset: 60,
-            validate: false
+            timeOffset: 60
         });
 
         rs = new JWT({
             algorithm: 'RS256',
+            autoValidate: false,
             expiresIn: 60 * 60,
             privateKey: fs.readFileSync(path.resolve(__dirname, 'fixtures/rs-private.pem'), 'utf8'),
             publicKey: fs.readFileSync(path.resolve(__dirname, 'fixtures/rs-public.pem'), 'utf8'),
-            timeOffset: 60,
-            validate: false
+            timeOffset: 60
         });
 
         return done();
@@ -40,18 +40,14 @@ describe('JWT', () => {
             expect(jwt).to.not.be.undefined;
 
             expect(jwt).to.have.keys([
-                'options'
+                '_algorithm',
+                '_autoValidate',
+                '_expiresIn',
+                '_key',
+                '_timeOffset'
             ]);
 
-            expect(jwt.options).to.have.keys([
-                'algorithm',
-                'expiresIn',
-                'key',
-                'timeOffset',
-                'validate'
-            ]);
-
-            expect(jwt.options.key.length).to.not.equal(0);
+            expect(jwt.key.length).to.not.equal(0);
         });
     });
 
@@ -115,7 +111,7 @@ describe('JWT', () => {
             const decoded = hs.decode(encoded);
             hs.validate(decoded);
             const payload = decoded.payload;
-            expect(payload['exp']).to.equal(payload['iat'] + hs.options.expiresIn);
+            expect(payload['exp']).to.equal(payload['iat'] + hs.expiresIn);
             expect(decoded.payload).to.deep.equal(decodedPayload);
         });
 
@@ -124,7 +120,7 @@ describe('JWT', () => {
             const decoded = rs.decode(encoded);
             rs.validate(decoded);
             const payload = decoded.payload;
-            expect(payload['exp']).to.equal(payload['iat'] + rs.options.expiresIn);
+            expect(payload['exp']).to.equal(payload['iat'] + rs.expiresIn);
             expect(decoded.payload).to.deep.equal(decodedPayload);
         });
     });

@@ -11,3 +11,40 @@
 An opinionated library for encoding, decoding, and verifying JSON Web Tokens (JWTs), heavily inspired by 
 [node-jwt-simple](https://github.com/hokaccha/node-jwt-simple).
 
+### Installation
+You can install from [npm](https://npmjs.com/nomatic-jwt) by doing:
+```bash
+npm i --save nomatic-jwt
+```
+
+### Basic Usage
+```javascript
+const JWT = require('nomatic-jwt').JWT;
+
+const jwt = new JWT({
+    algorithm: 'HS256', // "HS256" | "HS384" | "HS512" | "RS256" | "RS384" | "RS512"
+    expiresIn: 60 * 60, // 1hr
+    key: 'somethingMoreSecureThanThis', // Valid only with HMAC-SHA algorithms
+    timeOffset: 60, // allowable wiggle room for expiration (`exp`) and not valid before (`nbf`) claims
+    validate: true // If false, won't validate when decoding
+});
+
+// Encode
+const token = jwt.encode({
+    sub: 'user/12345678',
+    roles: ['manager']
+});
+/* eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+ * .eyJzdWIiOiJ1c2VyLzEyMzQ1Njc4Iiwicm9sZXMiOlsibWFuYWdlciJdLCJleHAiOjE1MDY4Nzk1ODAsIm5iZiI6MTUwNjg3NTk4MCwiaWF0IjoxNTA
+ * 2ODc1OTgwfQ
+ * .FjHYltcA1Natf6Iu72HyGxkk4GX2phMRG3yNW65_IsQ'
+ */
+
+
+// Decode
+const decoded = jwt.decode(token);
+
+```
+
+
+
