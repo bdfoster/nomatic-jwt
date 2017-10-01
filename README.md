@@ -4,6 +4,7 @@
 [![npm](https://img.shields.io/npm/v/nomatic-jwt.svg)](https://www.npmjs.com/package/nomatic-jwt)
 [![Build Status](https://travis-ci.org/bdfoster/nomatic-jwt.svg?branch=greenkeeper%2Finitial)](https://travis-ci.org/bdfoster/nomatic-jwt)
 [![Coverage Status](https://coveralls.io/repos/github/bdfoster/nomatic-jwt/badge.svg)](https://coveralls.io/github/bdfoster/nomatic-jwt)
+[![Known Vulnerabilities](https://snyk.io/test/github/bdfoster/nomatic-jwt/badge.svg)](https://snyk.io/test/github/bdfoster/nomatic-jwt)
 [![dependencies Status](https://david-dm.org/bdfoster/nomatic-jwt/status.svg)](https://david-dm.org/bdfoster/nomatic-jwt)
 [![devDependencies Status](https://david-dm.org/bdfoster/nomatic-jwt/dev-status.svg)](https://david-dm.org/bdfoster/nomatic-jwt?type=dev)
 [![License](https://img.shields.io/github/license/bdfoster/nomatic-jwt.svg)](https://github.com/bdfoster/nomatic-jwt/blob/master/LICENSE)
