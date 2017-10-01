@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import 'mocha';
-import * as base64 from '../../lib/base64';
+import * as base64 from '../src/base64';
 
 
 describe('base64', () => {

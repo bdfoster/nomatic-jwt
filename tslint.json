@@ -1,44 +1,20 @@
 {
+  "defaultSeverity": "error",
+  "jsRules": {},
   "rules": {
-    "cyclomatic-complexity": [
-      true,
-      15
-    ],
-    "prefer-const": true,
-    "semicolon": true,
-    "jsdoc-format": true,
-    "class-name": true,
-    "new-parens": true,
+    "align": [true, "parameters", "statements"],
+    "array-type": [true, "array"],
+    "arrow-parens": true,
+    "encoding": true,
+    "eofline": true,
+    "indent": [true, "spaces", 4],
+    "no-floating-promises": true,
+    "no-var-requires": false,
+    "no-unnecessary-qualifier": true,
     "ordered-imports": true,
-    "one-variable-per-declaration": true,
-    "quotemark": [
-      true,
-      "single"
-    ],
-    "no-use-before-declare": true,
-    "no-var-keyword": true,
-    "no-reference": true,
-    "align": [
-      true,
-      "parameters",
-      "statements"
-    ],
-    "variable-name": [
-      true,
-      "ban-keywords",
-      "check-format",
-      "allow-leading-underscore"
-    ],
-    "trailing-comma": [
-      true,
-      {
-        "multiline": "never",
-        "singleline": "never"
-      }
-    ],
-    "indent": [
-      true,
-      "spaces"
-    ]
-  }
+    "prefer-const": true,
+    "quotemark": [true, "single"],
+    "semicolon": [true, "always"]
+  },
+  "rulesDirectory": []
 }

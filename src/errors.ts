@@ -1,4 +1,4 @@
-export class TokenError extends Error {
+export class JWTError extends Error {
     public statusCode: number = 400;
 
     constructor(message: string) {
@@ -6,18 +6,18 @@ export class TokenError extends Error {
     }
 }
 
-export class TokenExpiredError extends TokenError {
+export class JWTExpiredError extends JWTError {
     public expiredAt: number;
 
     constructor(expiredAt: number) {
-        super('Token has already expired');
+        super('JWT has already expired');
         this.expiredAt = expiredAt;
     }
 }
 
-export class TokenSignatureError extends TokenError {
+export class JWTSignatureError extends JWTError {
     constructor() {
-        super('Token signature is not valid');
+        super('JWT signature is not valid');
     }
 }
 

@@ -1,66 +1,58 @@
 {
   "name": "nomatic-jwt",
-  "version": "0.1.0",
   "description": "JSON Web Token (JWT) utilities for Node.js",
-  "main": "index.js",
+  "version": "0.0.0-development",
+  "main": "src/index.js",
   "scripts": {
-    "lint": "tslint  \"**/*.ts{,x}\" -e \"node_modules/**\" -e \"**/*.d.ts{,x}\"",
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf src/**/*.js src/**/*.d.ts src/**/*.js.map src/*.js src/*.d.ts src/*.js.map",
+    "lint": "tslint -c tslint.json --project tsconfig.json",
     "lint:fix": "npm run lint -- --fix",
-    "build": "tsc",
-    "postinstall": "npm run build",
-    "test": "mocha --recursive test/**/*.test.js",
-    "coverage": "nyc mocha --recursive test/**/*.test.js",
-    "docs": "typedoc --out ./docs --mode file --hideGenerator ./lib"
+    "test": "rm -rf coverage/ && cross-env NODE_ENV=test nyc mocha --reporter spec",
+    "test:ci": "NODE_ENV=ci nyc mocha --reporter spec",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "docs": "rm -rf docs/ && typedoc --out ./docs/ --module commonjs --name nomatic-jwt --hideGenerator --mode file --excludeExternals --excludePrivate --includeDeclarations ./src",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.bdfoster.com/bdfoster/nomatic-jwt.git"
+    "url": "https://github.com/bdfoster/nomatic-jwt.git"
   },
   "keywords": [
+    "nomatic",
     "jwt",
     "json",
     "web",
     "token",
     "decode",
-    "encode"
+    "encode",
+    "authentication",
+    "authorization",
+    "auth"
   ],
   "author": "Brian D. Foster <bdfoster89@gmail.com>",
   "license": "MIT",
-  "nyc": {
-    "exclude": [
-      "node_modules/",
-      "test/"
-    ],
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "reporter": [
-      "text-summary",
-      "html"
-    ],
-    "sourceMap": true,
-    "instrument": true
+  "bugs": {
+    "url": "https://github.com/bdfoster/nomatic-jwt/issues"
+  },
+  "homepage": "https://github.com/bdfoster/nomatic-jwt#readme",
+  "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.31",
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "cross-env": "^5.0.5",
+    "mocha": "^3.5.3",
+    "nyc": "^11.2.1",
+    "semantic-release": "^8.0.4",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.7.0",
+    "typedoc": "^0.8.0",
+    "typescript": "^2.5.3"
   },
   "dependencies": {
     "@types/crypto-js": "^3.1.32",
-    "@types/mocha": "^2.2.36",
-    "crypto-js": "^3.1.9-1",
-    "source-map-support": "^0.4.8",
-    "typescript": "^2.1.4"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.0.4",
-    "@types/node": "^8.0.26",
-    "@types/source-map-support": "^0.4.0",
-    "chai": "^4.1.2",
-    "mocha": "^3.2.0",
-    "nyc": "^11.2.0",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.7.0",
-    "typedoc": "^0.8.0"
+    "crypto-js": "^3.1.9-1"
   }
 }

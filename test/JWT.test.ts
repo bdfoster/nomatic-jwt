@@ -2,14 +2,12 @@ import {expect} from 'chai';
 import * as fs from 'fs';
 import 'mocha';
 import * as path from 'path';
-import * as jwt from '../../lib/jwt';
-import {Token} from '../../lib/jwt';
-import {Payload} from '../../lib/jwt';
-
+import jwt from '../src';
+import {JWT} from '../src';
 
 describe('JWT', () => {
-    let hs: jwt.JWT;
-    let rs: jwt.JWT;
+    let hs: JWT;
+    let rs: JWT;
     const decodedPayload = {
         bool: true,
         str: 'test123',
@@ -17,19 +15,19 @@ describe('JWT', () => {
     };
 
     before((done) => {
-        hs = new jwt.JWT({
+        hs = new JWT({
             algorithm: 'HS256',
             expiresIn: 60 * 60,
-            key: 'testsecret123',
+            key: 'testSecret123',
             timeOffset: 60,
             validate: false
         });
 
-        rs = new jwt.JWT({
+        rs = new JWT({
             algorithm: 'RS256',
             expiresIn: 60 * 60,
-            privateKey: fs.readFileSync(path.resolve(__dirname, '../fixtures/rs-private.pem'), 'utf8'),
-            publicKey: fs.readFileSync(path.resolve(__dirname, '../fixtures/rs-public.pem'), 'utf8'),
+            privateKey: fs.readFileSync(path.resolve(__dirname, 'fixtures/rs-private.pem'), 'utf8'),
+            publicKey: fs.readFileSync(path.resolve(__dirname, 'fixtures/rs-public.pem'), 'utf8'),
             timeOffset: 60,
             validate: false
         });
@@ -39,13 +37,13 @@ describe('JWT', () => {
 
     describe('#constructor()', () => {
         it('should create a new instance', () => {
-            expect(jwt.default).to.not.be.undefined;
+            expect(jwt).to.not.be.undefined;
 
-            expect(jwt.default).to.have.keys([
+            expect(jwt).to.have.keys([
                 'options'
             ]);
 
-            expect(jwt.default.options).to.have.keys([
+            expect(jwt.options).to.have.keys([
                 'algorithm',
                 'expiresIn',
                 'key',
@@ -53,7 +51,7 @@ describe('JWT', () => {
                 'validate'
             ]);
 
-            expect(jwt.default.options.key.length).to.not.equal(0);
+            expect(jwt.options.key.length).to.not.equal(0);
         });
     });
 
@@ -114,18 +112,18 @@ describe('JWT', () => {
     describe('#validate()', () => {
         it('should validate a token via HS algorithm type', () => {
             const encoded = hs.encode(decodedPayload);
-            const decoded: Token = hs.decode(encoded);
+            const decoded = hs.decode(encoded);
             hs.validate(decoded);
-            const payload: Payload = decoded.payload;
+            const payload = decoded.payload;
             expect(payload['exp']).to.equal(payload['iat'] + hs.options.expiresIn);
             expect(decoded.payload).to.deep.equal(decodedPayload);
         });
 
         it('should validate a token via RS algorithm type', () => {
             const encoded = rs.encode(decodedPayload);
-            const decoded: Token = rs.decode(encoded);
+            const decoded = rs.decode(encoded);
             rs.validate(decoded);
-            const payload: Payload = decoded.payload;
+            const payload = decoded.payload;
             expect(payload['exp']).to.equal(payload['iat'] + rs.options.expiresIn);
             expect(decoded.payload).to.deep.equal(decodedPayload);
         });

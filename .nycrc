@@ -1,0 +1,19 @@
+{
+  "extension": [
+    ".ts",
+    ".tsx"
+  ],
+  "exclude": [
+    "**/*.d.ts",
+    "test",
+    "node_modules",
+    "scripts",
+    "docs"
+  ],
+  "reporter": [
+    "html",
+    "text-summary"
+  ],
+  "produce-source-map": true,
+  "all": true
+}

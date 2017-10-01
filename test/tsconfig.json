@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es2017", "dom"],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
     "sourceMap": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -14,9 +17,5 @@
     "noLib": false,
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "compileOnSave": true
+  }
 }

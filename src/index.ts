@@ -1,19 +1,19 @@
 import * as crypto from 'crypto';
 import * as CryptoJS from 'crypto-js';
 import * as base64 from './base64';
-import {TokenExpiredError, TokenSignatureError} from './errors';
+import {JWTError, JWTExpiredError, JWTSignatureError} from './errors';
 
-export type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
-export type Claims = RegisteredClaims & PrivateClaims;
-export type Payload = Claims | String;
+export type JWTAlgorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
+export type JWTClaims = JWTRegisteredClaims & JWTPrivateClaims;
+export type JWTPayloadData = JWTClaims | string;
 
-export interface Header {
+export interface JWTHeaderData {
     typ: string;
     alg: string;
 }
 
-export interface Options {
-    algorithm?: Algorithm;
+export interface JWTOptions {
+    algorithm?: JWTAlgorithm;
     expiresIn?: number; // In seconds
     timeOffset?: number; // In seconds
     key?: string;
@@ -22,13 +22,13 @@ export interface Options {
     validate?: boolean;
 }
 
-export interface Token {
-    header: Header;
-    payload: Payload;
+export interface JWTData {
+    header: JWTHeaderData;
+    payload: JWTPayloadData;
     signature: string;
 }
 
-export interface RegisteredClaims {
+export interface JWTRegisteredClaims {
     /**
      * Issuer (registered): RFC-7519 (https://tools.ietf.org/html/rfc7519#section-4.1.1)
      */
@@ -65,14 +65,14 @@ export interface RegisteredClaims {
     jid?: any;
 }
 
-export interface PrivateClaims {
-    [key: string]: string | number | boolean | Object | Array<any>;
+export interface JWTPrivateClaims {
+    [key: string]: string | number | boolean | Object | any[];
 }
 
 export class JWT {
-    public options: Options;
+    public options: JWTOptions;
 
-    constructor (options: Options) {
+    constructor (options: JWTOptions) {
         this.options = options;
 
         if (!this.options.timeOffset) {
@@ -96,7 +96,7 @@ export class JWT {
         }
     }
 
-    public static parsePayload(payload: string): Payload {
+    public static parsePayload(payload: string): JWTPayloadData {
         try {
             return JSON.parse(payload);
         } catch (error) {
@@ -108,7 +108,7 @@ export class JWT {
         }
     }
 
-    public signRaw(data: string, key: string = null, algorithm: Algorithm = this.options.algorithm): string {
+    public signRaw(data: string, key: string = null, algorithm: JWTAlgorithm = this.options.algorithm): string {
         if (!key) {
             if (algorithm.startsWith('RS')) {
                 key = this.options.privateKey;
@@ -136,7 +136,7 @@ export class JWT {
         return base64.escape(signature);
     }
 
-    public verifyRaw(data: string, signature: string, key: string = null, algorithm: Algorithm = this.options.algorithm): boolean {
+    public verifyRaw(data: string, signature: string, key: string = null, algorithm: JWTAlgorithm = this.options.algorithm): boolean {
         if (algorithm.startsWith('HS')) {
             if (!key) {
                 key = this.options.key;
@@ -156,7 +156,7 @@ export class JWT {
         }
     }
 
-    public decode(encoded: string, key: string = null, algorithm: Algorithm = this.options.algorithm): Token {
+    public decode(encoded: string, key: string = null, algorithm: JWTAlgorithm = this.options.algorithm): JWTData {
         if (!key) {
             if (algorithm.startsWith('RS')) {
                 key = this.options.publicKey;
@@ -171,7 +171,7 @@ export class JWT {
             throw new Error('Invalid number of encoded parts: ' + encoded.length);
         }
 
-        const token: Token = {
+        const token: JWTData = {
             header: JSON.parse(base64.decodeSafe(encodedParts[0])),
             payload: JWT.parsePayload(base64.decodeSafe(encodedParts[1])),
             signature: encodedParts[2]
@@ -184,7 +184,7 @@ export class JWT {
         }
     }
 
-    public encode(payload: Payload, key: string = null, algorithm: Algorithm = this.options.algorithm): string {
+    public encode(payload: JWTPayloadData, key: string = null, algorithm: JWTAlgorithm = this.options.algorithm): string {
         if (!key) {
             if (algorithm.startsWith('RS')) {
                 key = this.options.privateKey;
@@ -193,7 +193,7 @@ export class JWT {
             }
         }
 
-        const header: Header = {
+        const header: JWTHeaderData = {
             typ: 'JWT',
             alg: algorithm
         };
@@ -220,7 +220,7 @@ export class JWT {
         return encoded.join('.');
     }
 
-    public validate(token: Token, key: string = null, algorithm: Algorithm = this.options.algorithm): Token {
+    public validate(token: JWTData, key: string = null, algorithm: JWTAlgorithm = this.options.algorithm): JWTData {
         if (!key) {
             if (algorithm.startsWith('RS')) {
                 key = this.options.publicKey;
@@ -237,7 +237,7 @@ export class JWT {
         const data = encoded.join('.');
 
         if (!(this.verifyRaw(data, token.signature, key, algorithm))) {
-            throw new TokenSignatureError();
+            throw new JWTSignatureError();
         }
 
         if (!(token.payload instanceof String)) {
@@ -245,7 +245,7 @@ export class JWT {
             if (token.payload['nbf']) {
                 const current = Math.floor((Date.now() / 1000));
                 if (current > (token.payload['nbf'] + this.options.timeOffset)) {
-                    throw new Error('Token is not active yet');
+                    throw new JWTError('JWT is not active yet');
                 }
             }
 
@@ -253,7 +253,7 @@ export class JWT {
                 const current = Math.floor((Date.now() / 1000));
 
                 if (current + this.options.timeOffset > token.payload['exp']) {
-                    throw new TokenExpiredError(token.payload['exp']);
+                    throw new JWTExpiredError(token.payload['exp']);
                 }
             }
         }
@@ -262,11 +262,9 @@ export class JWT {
     }
 }
 
-export const global = new JWT({
+export default new JWT({
     expiresIn: 60 * 60,
     key: crypto.randomBytes(128).toString('hex'),
     timeOffset: 60,
     validate: true
 });
-
-export default global;
