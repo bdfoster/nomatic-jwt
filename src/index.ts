@@ -333,7 +333,7 @@ export class JWT {
             // `this.timeOffset`, `token.payload['nbf']` (not before) and `token.payload['exp']` (expires) are in seconds
             if (token.payload['nbf']) {
                 const current = Math.floor((Date.now() / 1000));
-                if (current > (token.payload['nbf'] + this.timeOffset)) {
+                if (token.payload['nbf'] > (current + this.timeOffset)) {
                     throw new JWTError('JWT is not active yet');
                 }
             }
