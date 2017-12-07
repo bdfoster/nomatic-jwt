@@ -1,0 +1,251 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>nomatic-jwt</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">nomatic-jwt</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> nomatic-jwt</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="nomatic-jwt">nomatic-jwt</h1>
+				<p><a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/bdfoster/nomatic-jwt.svg" alt="Greenkeeper badge"></a>
+					<a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="Semantic Release"></a>
+					<a href="https://github.com/bdfoster/nomatic-jwt/releases"><img src="https://img.shields.io/github/release/bdfoster/nomatic-jwt.svg" alt="GitHub release"></a>
+					<a href="https://www.npmjs.com/package/nomatic-jwt"><img src="https://img.shields.io/npm/v/nomatic-jwt.svg" alt="npm"></a>
+					<a href="https://travis-ci.org/bdfoster/nomatic-jwt"><img src="https://travis-ci.org/bdfoster/nomatic-jwt.svg?branch=greenkeeper%2Finitial" alt="Build Status"></a>
+					<a href="https://coveralls.io/github/bdfoster/nomatic-jwt"><img src="https://coveralls.io/repos/github/bdfoster/nomatic-jwt/badge.svg" alt="Coverage Status"></a>
+					<a href="https://snyk.io/test/github/bdfoster/nomatic-jwt"><img src="https://snyk.io/test/github/bdfoster/nomatic-jwt/badge.svg" alt="Known Vulnerabilities"></a>
+					<a href="https://david-dm.org/bdfoster/nomatic-jwt"><img src="https://david-dm.org/bdfoster/nomatic-jwt/status.svg" alt="dependencies Status"></a>
+					<a href="https://david-dm.org/bdfoster/nomatic-jwt?type=dev"><img src="https://david-dm.org/bdfoster/nomatic-jwt/dev-status.svg" alt="devDependencies Status"></a>
+				<a href="https://github.com/bdfoster/nomatic-jwt/blob/master/LICENSE"><img src="https://img.shields.io/github/license/bdfoster/nomatic-jwt.svg" alt="License"></a></p>
+				<p>An opinionated library for encoding, decoding, and verifying JSON Web Tokens (JWTs), heavily inspired by
+				<a href="https://github.com/hokaccha/node-jwt-simple">node-jwt-simple</a>.</p>
+				<h3 id="installation">Installation</h3>
+				<p>You can install from <a href="https://npmjs.com/nomatic-jwt">npm</a> by doing:</p>
+				<pre><code class="lang-bash">npm i --save nomatic-jwt
+</code></pre>
+				<h3 id="basic-usage">Basic Usage</h3>
+				<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> JWT = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nomatic-jwt'</span>).JWT;
+
+<span class="hljs-keyword">const</span> jwt = <span class="hljs-keyword">new</span> JWT({
+    <span class="hljs-attr">algorithm</span>: <span class="hljs-string">'HS256'</span>, <span class="hljs-comment">// "HS256" | "HS384" | "HS512" | "RS256" | "RS384" | "RS512"</span>
+    expiresIn: <span class="hljs-number">60</span> * <span class="hljs-number">60</span>, <span class="hljs-comment">// 1hr</span>
+    key: <span class="hljs-string">'somethingMoreSecureThanThis'</span>, <span class="hljs-comment">// Valid only with HMAC-SHA algorithms</span>
+    timeOffset: <span class="hljs-number">60</span>, <span class="hljs-comment">// allowable wiggle room for expiration (`exp`) and not valid before (`nbf`) claims</span>
+    validate: <span class="hljs-literal">true</span> <span class="hljs-comment">// If false, won't validate when decoding</span>
+});
+
+<span class="hljs-comment">// Encode</span>
+<span class="hljs-keyword">const</span> token = jwt.encode({
+    <span class="hljs-attr">sub</span>: <span class="hljs-string">'user/12345678'</span>,
+    <span class="hljs-attr">roles</span>: [<span class="hljs-string">'manager'</span>]
+});
+<span class="hljs-comment">/* eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+ * .eyJzdWIiOiJ1c2VyLzEyMzQ1Njc4Iiwicm9sZXMiOlsibWFuYWdlciJdLCJleHAiOjE1MDY4Nzk1ODAsIm5iZiI6MTUwNjg3NTk4MCwiaWF0IjoxNTA
+ * 2ODc1OTgwfQ
+ * .FjHYltcA1Natf6Iu72HyGxkk4GX2phMRG3yNW65_IsQ'
+ */</span>
+
+
+<span class="hljs-comment">// Decode</span>
+<span class="hljs-keyword">const</span> decoded = jwt.decode(token);
+</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/jwt.html" class="tsd-kind-icon">JWT</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/jwterror.html" class="tsd-kind-icon">JWTError</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/jwtexpirederror.html" class="tsd-kind-icon">JWTExpired<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/jwtsignatureerror.html" class="tsd-kind-icon">JWTSignature<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/jwtdata.html" class="tsd-kind-icon">JWTData</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/jwtheaderdata.html" class="tsd-kind-icon">JWTHeader<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/jwtoptions.html" class="tsd-kind-icon">JWTOptions</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/jwtprivateclaims.html" class="tsd-kind-icon">JWTPrivate<wbr>Claims</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/jwtregisteredclaims.html" class="tsd-kind-icon">JWTRegistered<wbr>Claims</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#jwtalgorithm" class="tsd-kind-icon">JWTAlgorithm</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#jwtclaims" class="tsd-kind-icon">JWTClaims</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#jwtpayloaddata" class="tsd-kind-icon">JWTPayload<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#decode" class="tsd-kind-icon">decode</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#decodesafe" class="tsd-kind-icon">decode<wbr>Safe</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#encode" class="tsd-kind-icon">encode</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#encodesafe" class="tsd-kind-icon">encode<wbr>Safe</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#escape" class="tsd-kind-icon">escape</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#unescape" class="tsd-kind-icon">unescape</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+<script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-96699243-1', '');
+        ga('send', 'pageview');
+    </script>
+</body>
+</html>
